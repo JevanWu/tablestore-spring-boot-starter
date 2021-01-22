@@ -1,14 +1,13 @@
 package org.springframework.boot.autoconfigure.tablestore.annotation;
 
-import org.springframework.boot.autoconfigure.tablestore.enums.OtsColumnType;
-import org.springframework.boot.autoconfigure.tablestore.utils.compress.NoCompress;
-
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import org.springframework.boot.autoconfigure.tablestore.enums.OtsColumnType;
+import org.springframework.boot.autoconfigure.tablestore.utils.compress.NoCompress;
 
 /**
  * Created on 2020/10/09
@@ -20,12 +19,20 @@ import java.lang.annotation.Target;
 @Inherited
 @Documented
 public @interface OtsColumn {
+
     /**
      * Primary key or not (default false)
      *
      * @return true of false
      */
     boolean primaryKey() default false;
+
+    /**
+     * Partition or not (default false)
+     *
+     * @return type of false
+     */
+    boolean partitionKey() default false;
 
     /**
      * Auto increase primary key or not (default false)
