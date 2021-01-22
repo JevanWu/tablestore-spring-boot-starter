@@ -1,18 +1,17 @@
 package org.springframework.boot.autoconfigure.tablestore.utils;
 
 import com.google.common.collect.Maps;
+import java.beans.IntrospectionException;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.Map;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.boot.autoconfigure.tablestore.annotation.OtsColumn;
 import org.springframework.boot.autoconfigure.tablestore.exception.OtsException;
 import org.springframework.boot.autoconfigure.tablestore.model.DynamicColumn;
 import org.springframework.boot.autoconfigure.tablestore.model.internal.FieldInfo;
 import org.springframework.util.ReflectionUtils;
-
-import java.beans.IntrospectionException;
-import java.beans.PropertyDescriptor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.Map;
 
 /**
  * Created on 2020/10/09
@@ -28,10 +27,12 @@ public class FieldUtils {
     }
 
     public static <T> void invokeWrite(Field field, T data, Object value) {
+        field.setAccessible(true);
         ReflectionUtils.setField(field, data, value);
     }
 
     public static <T> Object invokeRead(Field field, T data) {
+        field.setAccessible(true);
         return ReflectionUtils.getField(field, data);
     }
 
@@ -56,7 +57,8 @@ public class FieldUtils {
         try {
             pd = new PropertyDescriptor(fieldName, clazz);
         } catch (IntrospectionException e) {
-            throw new OtsException("reflect error, class: %s, field: %s", e, clazz.getName(), fieldName);
+            throw new OtsException("reflect error, class: %s, field: %s", e, clazz.getName(),
+                fieldName);
         }
         return pd.getWriteMethod();
     }
@@ -66,7 +68,8 @@ public class FieldUtils {
         try {
             pd = new PropertyDescriptor(fieldName, clazz);
         } catch (IntrospectionException e) {
-            throw new OtsException("reflect error, class: %s, field: %s", e, clazz.getName(), fieldName);
+            throw new OtsException("reflect error, class: %s, field: %s", e, clazz.getName(),
+                fieldName);
         }
         return pd.getReadMethod();
     }
@@ -74,6 +77,7 @@ public class FieldUtils {
     private static boolean getDeclaredFields(Class<?> clazz, Map<String, FieldInfo> fieldMap) {
         Field[] fields = clazz.getDeclaredFields();
         for (Field field : fields) {
+            field.setAccessible(true);
             OtsColumn otsColumn = field.getAnnotation(OtsColumn.class);
             String columnName = ColumnUtils.getColumnName(field.getName(), otsColumn);
             if (!fieldMap.containsKey(field.getName())) {

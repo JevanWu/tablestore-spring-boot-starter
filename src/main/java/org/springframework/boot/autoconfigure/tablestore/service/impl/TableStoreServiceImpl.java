@@ -34,6 +34,9 @@ import com.alicloud.openservices.tablestore.model.search.SearchRequest;
 import com.alicloud.openservices.tablestore.model.search.SearchResponse;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -52,10 +55,6 @@ import org.springframework.boot.autoconfigure.tablestore.service.TableStoreServi
 import org.springframework.boot.autoconfigure.tablestore.utils.ColumnUtils;
 import org.springframework.boot.autoconfigure.tablestore.utils.FieldUtils;
 import org.springframework.boot.autoconfigure.tablestore.utils.OtsUtils;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 /**
  * Created on 2020/10/09
@@ -133,7 +132,8 @@ public class TableStoreServiceImpl implements TableStoreService {
     }
 
     @Override
-    public <T> BatchWriteRowResponse batchUpdate(List<Pair<T, Condition>> dataPairs, boolean deleteNull) {
+    public <T> BatchWriteRowResponse batchUpdate(List<Pair<T, Condition>> dataPairs,
+        boolean deleteNull) {
         Preconditions.checkNotNull(dataPairs);
         BatchWriteRowRequest request = new BatchWriteRowRequest();
         for (Pair<T, Condition> dataPair : dataPairs) {
@@ -158,16 +158,17 @@ public class TableStoreServiceImpl implements TableStoreService {
         PrimaryKey start = query.startPrimaryKey();
         int batchSize = Math.min(query.limit(), 100);
         while (start != null) {
-            GetRangeResponse response = getRange(table.name(), start, query.endPrimaryKey(), query.columnNames(),
-                    query.direction(), batchSize);
+            GetRangeResponse response = getRange(table.name(), start, query.endPrimaryKey(),
+                query.columnNames(),
+                query.direction(), batchSize);
             if (response == null || response.getRows() == null) {
                 reply.nextStartPrimaryKey(null);
                 break;
             }
             response.getRows().stream()
-                    .map(row -> OtsUtils.build(row, clazz))
-                    .filter(Objects::nonNull)
-                    .forEach(reply::add);
+                .map(row -> OtsUtils.build(row, clazz))
+                .filter(Objects::nonNull)
+                .forEach(reply::add);
             start = response.getNextStartPrimaryKey();
             if (query.limit() > 0) {
                 batchSize = Math.min(query.limit() - reply.records().size(), 500);
@@ -205,13 +206,13 @@ public class TableStoreServiceImpl implements TableStoreService {
         }
         BatchGetReply<T> reply = new BatchGetReply<>();
         response.getSucceedRows().stream()
-                .map(BatchGetRowResponse.RowResult::getRow)
-                .filter(Objects::nonNull)
-                .map(row -> OtsUtils.build(row, clazz))
-                .filter(Objects::nonNull)
-                .forEach(reply::add);
+            .map(BatchGetRowResponse.RowResult::getRow)
+            .filter(Objects::nonNull)
+            .map(row -> OtsUtils.build(row, clazz))
+            .filter(Objects::nonNull)
+            .forEach(reply::add);
         response.getFailedRows().forEach(
-                result -> reply.addError(Pair.of(result.getRow().getPrimaryKey(), result.getError())));
+            result -> reply.addError(Pair.of(result.getRow().getPrimaryKey(), result.getError())));
         return reply;
     }
 
@@ -241,9 +242,9 @@ public class TableStoreServiceImpl implements TableStoreService {
 
         IndexSearchReply<T> reply = new IndexSearchReply<>();
         response.getRows().stream()
-                .map(row -> OtsUtils.build(row, clazz))
-                .filter(Objects::nonNull)
-                .forEach(reply::add);
+            .map(row -> OtsUtils.build(row, clazz))
+            .filter(Objects::nonNull)
+            .forEach(reply::add);
         reply.totalCount(response.getTotalCount());
         reply.allSuccess(response.isAllSuccess());
         return reply;
@@ -253,7 +254,7 @@ public class TableStoreServiceImpl implements TableStoreService {
      * 构造TableStore插入行
      *
      * @param data 原始数据
-     * @param <T>  泛型
+     * @param <T> 泛型
      * @return 返回TableStore插入行变更
      */
     @SuppressWarnings(value = "unchecked")
@@ -268,10 +269,11 @@ public class TableStoreServiceImpl implements TableStoreService {
         List<PrimaryKeyColumn> primaryKeyColumns = Lists.newArrayList();
         List<Column> columns = Lists.newArrayList();
 
-        Pair<Map<String, FieldInfo>, Boolean> declaredFieldInfo = FieldUtils.getDeclaredFields(data.getClass());
+        Pair<Map<String, FieldInfo>, Boolean> declaredFieldInfo = FieldUtils
+            .getDeclaredFields(data.getClass());
         declaredFieldInfo.getKey().forEach((columnName, fieldInfo) -> {
             Object value = FieldUtils.invokeRead(fieldInfo.field(), data);
-            if (value == null) {
+            if (value == null && !fieldInfo.otsColumn().autoIncrease()) {
                 return;
             }
             if (fieldInfo.otsColumn() != null && !fieldInfo.otsColumn().writable()) {
@@ -284,7 +286,8 @@ public class TableStoreServiceImpl implements TableStoreService {
             }
         });
         if (declaredFieldInfo.getValue()) {
-            Map<String, Object> values = (Map<String, Object>) FieldUtils.invokeRead("dynamicColumns", data);
+            Map<String, Object> values = (Map<String, Object>) FieldUtils
+                .invokeRead("dynamicColumns", data);
             if (MapUtils.isNotEmpty(values)) {
                 values.forEach((key, value) -> {
                     if (value != null) {
@@ -303,7 +306,7 @@ public class TableStoreServiceImpl implements TableStoreService {
      * 构造TableStore更新行
      *
      * @param data 原始数据
-     * @param <T>  泛型
+     * @param <T> 泛型
      * @return 返回TableStore更新行变更
      */
     @SuppressWarnings(value = "unchecked")
@@ -321,14 +324,16 @@ public class TableStoreServiceImpl implements TableStoreService {
         List<PrimaryKeyColumn> primaryKeyColumns = Lists.newArrayList();
         List<Column> columns = Lists.newArrayList();
 
-        Pair<Map<String, FieldInfo>, Boolean> declaredFieldInfo = FieldUtils.getDeclaredFields(data.getClass());
+        Pair<Map<String, FieldInfo>, Boolean> declaredFieldInfo = FieldUtils
+            .getDeclaredFields(data.getClass());
         declaredFieldInfo.getKey().forEach((columnName, fieldInfo) -> {
             if (fieldInfo.otsColumn() != null && !fieldInfo.otsColumn().writable()) {
                 return;
             }
             Object value = FieldUtils.invokeRead(fieldInfo.field(), data);
             if (value == null) {
-                if (deleteNull && fieldInfo.otsColumn() != null && !fieldInfo.otsColumn().primaryKey()) {
+                if (deleteNull && fieldInfo.otsColumn() != null && !fieldInfo.otsColumn()
+                    .primaryKey()) {
                     rowUpdateChange.deleteColumns(columnName);
                 }
                 return;
@@ -341,7 +346,8 @@ public class TableStoreServiceImpl implements TableStoreService {
         });
 
         if (declaredFieldInfo.getValue()) {
-            Map<String, Object> values = (Map<String, Object>) FieldUtils.invokeRead("dynamicColumns", data);
+            Map<String, Object> values = (Map<String, Object>) FieldUtils
+                .invokeRead("dynamicColumns", data);
             if (MapUtils.isNotEmpty(values)) {
                 values.forEach((key, value) -> {
                     if (value == null) {
@@ -360,7 +366,8 @@ public class TableStoreServiceImpl implements TableStoreService {
         return rowUpdateChange;
     }
 
-    private void setPrimaryColumns(OtsColumn otsColumn, String columnName, Object value, List<PrimaryKeyColumn> primaryKeyColumns) {
+    private void setPrimaryColumns(OtsColumn otsColumn, String columnName, Object value,
+        List<PrimaryKeyColumn> primaryKeyColumns) {
         PrimaryKeyValue primaryKeyValue;
         if (otsColumn.autoIncrease() && value == null) {
             primaryKeyValue = PrimaryKeyValue.AUTO_INCREMENT;
@@ -374,7 +381,8 @@ public class TableStoreServiceImpl implements TableStoreService {
         }
     }
 
-    private void setColumns(OtsColumn otsColumn, String columnName, Object value, List<Column> columns) {
+    private void setColumns(OtsColumn otsColumn, String columnName, Object value,
+        List<Column> columns) {
         ColumnValue columnValue = ColumnUtils.getColumnValue(value, otsColumn);
         if (columnValue != null) {
             columns.add(new Column(columnName, columnValue));
@@ -383,7 +391,8 @@ public class TableStoreServiceImpl implements TableStoreService {
         }
     }
 
-    private GetRangeResponse getRange(String tableName, PrimaryKey start, PrimaryKey end, List<String> columnNames, Direction direction, int limit) {
+    private GetRangeResponse getRange(String tableName, PrimaryKey start, PrimaryKey end,
+        List<String> columnNames, Direction direction, int limit) {
         GetRangeRequest getRangeRequest = new GetRangeRequest();
         RangeRowQueryCriteria criteria = new RangeRowQueryCriteria(tableName);
         criteria.setInclusiveStartPrimaryKey(start);
