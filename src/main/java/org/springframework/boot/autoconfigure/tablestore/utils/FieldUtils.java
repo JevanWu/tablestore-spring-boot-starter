@@ -5,6 +5,7 @@ import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Map;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.boot.autoconfigure.tablestore.annotation.OtsColumn;
@@ -78,6 +79,9 @@ public class FieldUtils {
         Field[] fields = clazz.getDeclaredFields();
         for (Field field : fields) {
             field.setAccessible(true);
+            if (Modifier.isFinal(field.getModifiers()) || Modifier.isFinal(field.getModifiers())) {
+                continue;
+            }
             OtsColumn otsColumn = field.getAnnotation(OtsColumn.class);
             String columnName = ColumnUtils.getColumnName(field.getName(), otsColumn);
             if (!fieldMap.containsKey(field.getName())) {
