@@ -1,11 +1,11 @@
 package org.springframework.boot.autoconfigure.tablestore.model;
 
 import com.alicloud.openservices.tablestore.model.search.SearchQuery;
+import com.alicloud.openservices.tablestore.model.search.agg.Aggregation;
 import com.alicloud.openservices.tablestore.model.search.query.Query;
 import com.alicloud.openservices.tablestore.model.search.sort.ScoreSort;
 import com.alicloud.openservices.tablestore.model.search.sort.Sort;
 import com.google.common.collect.Lists;
-
 import java.util.List;
 
 /**
@@ -16,6 +16,8 @@ import java.util.List;
 public class IndexSearchQuery {
 
     private Query query;
+
+    private List<Aggregation> aggregationList;
 
     private int offset;
 
@@ -30,6 +32,7 @@ public class IndexSearchQuery {
     public SearchQuery searchQuery() {
         SearchQuery searchQuery = new SearchQuery();
         searchQuery.setQuery(query);
+        searchQuery.setAggregationList(aggregationList);
         searchQuery.setOffset(offset);
         searchQuery.setLimit(size);
         searchQuery.setGetTotalCount(getTotalCount);
@@ -43,6 +46,14 @@ public class IndexSearchQuery {
 
     public void query(Query query) {
         this.query = query;
+    }
+
+    public List<Aggregation> getAggregationList() {
+        return aggregationList;
+    }
+
+    public void aggregationList(List<Aggregation> aggregationList) {
+        this.aggregationList = aggregationList;
     }
 
     public int offset() {

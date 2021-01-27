@@ -246,6 +246,8 @@ public class TableStoreServiceImpl implements TableStoreService {
             .filter(Objects::nonNull)
             .forEach(reply::add);
         reply.totalCount(response.getTotalCount());
+        reply.aggregationResults(response.getAggregationResults());
+        reply.groupByResults(response.getGroupByResults());
         reply.allSuccess(response.isAllSuccess());
         return reply;
     }

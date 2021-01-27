@@ -1,7 +1,8 @@
 package org.springframework.boot.autoconfigure.tablestore.model;
 
+import com.alicloud.openservices.tablestore.model.search.agg.AggregationResults;
+import com.alicloud.openservices.tablestore.model.search.groupby.GroupByResults;
 import com.google.common.collect.Lists;
-
 import java.util.List;
 
 /**
@@ -16,6 +17,26 @@ public class IndexSearchReply<T> {
     private boolean allSuccess;
 
     private List<T> records = Lists.newArrayList();
+
+    private AggregationResults aggregationResults;
+
+    private GroupByResults groupByResults;
+
+    public AggregationResults aggregationResults() {
+        return aggregationResults;
+    }
+
+    public void aggregationResults(AggregationResults aggregationResults) {
+        this.aggregationResults = aggregationResults;
+    }
+
+    public GroupByResults groupByResults() {
+        return groupByResults;
+    }
+
+    public void groupByResults(GroupByResults groupByResults) {
+        this.groupByResults = groupByResults;
+    }
 
     public void add(T record) {
         records.add(record);
