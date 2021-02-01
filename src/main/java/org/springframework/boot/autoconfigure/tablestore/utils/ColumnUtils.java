@@ -1,13 +1,13 @@
 package org.springframework.boot.autoconfigure.tablestore.utils;
 
 import com.alibaba.fastjson.JSON;
-import com.alicloud.openservices.tablestore.model.*;
+import com.alicloud.openservices.tablestore.model.Column;
+import com.alicloud.openservices.tablestore.model.ColumnValue;
+import com.alicloud.openservices.tablestore.model.Direction;
+import com.alicloud.openservices.tablestore.model.PrimaryKey;
+import com.alicloud.openservices.tablestore.model.PrimaryKeyColumn;
+import com.alicloud.openservices.tablestore.model.PrimaryKeyValue;
 import com.google.common.collect.Lists;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.boot.autoconfigure.tablestore.annotation.OtsColumn;
-import org.springframework.boot.autoconfigure.tablestore.model.RangeGetQuery.KeyType;
-import org.springframework.boot.autoconfigure.tablestore.utils.compress.NoCompress;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -16,6 +16,10 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.boot.autoconfigure.tablestore.annotation.OtsColumn;
+import org.springframework.boot.autoconfigure.tablestore.model.RangeGetQuery.KeyType;
+import org.springframework.boot.autoconfigure.tablestore.utils.compress.NoCompress;
 
 /**
  * Created on 2020/10/09
@@ -36,21 +40,23 @@ public class ColumnUtils {
             return null;
         }
         if (value instanceof byte[]) {
-            return columnValue((byte[])value, otsColumn);
+            return columnValue((byte[]) value, otsColumn);
         } else if (value instanceof Short) {
-            return columnValue((Short)value, otsColumn);
+            return columnValue((Short) value, otsColumn);
         } else if (value instanceof Integer) {
-            return columnValue((Integer)value, otsColumn);
+            return columnValue((Integer) value, otsColumn);
         } else if (value instanceof Long) {
-            return columnValue((Long)value, otsColumn);
+            return columnValue((Long) value, otsColumn);
         } else if (value instanceof Float) {
-            return columnValue((Float)value, otsColumn);
+            return columnValue((Float) value, otsColumn);
         } else if (value instanceof Double) {
-            return columnValue((Double)value, otsColumn);
+            return columnValue((Double) value, otsColumn);
         } else if (value instanceof Boolean) {
-            return columnValue((Boolean)value, otsColumn);
+            return columnValue((Boolean) value, otsColumn);
         } else if (value instanceof String) {
-            return columnValue((String)value, otsColumn);
+            return columnValue((String) value, otsColumn);
+        } else if (value instanceof Enum) {
+            return columnValue(value.toString(), otsColumn);
         } else {
             return columnValue(value, otsColumn);
         }
@@ -61,21 +67,21 @@ public class ColumnUtils {
             return null;
         }
         if (value instanceof byte[]) {
-            return primaryKeyValue((byte[])value, otsColumn);
+            return primaryKeyValue((byte[]) value, otsColumn);
         } else if (value instanceof Short) {
-            return primaryKeyValue((Short)value, otsColumn);
+            return primaryKeyValue((Short) value, otsColumn);
         } else if (value instanceof Integer) {
-            return primaryKeyValue((Integer)value, otsColumn);
+            return primaryKeyValue((Integer) value, otsColumn);
         } else if (value instanceof Long) {
-            return primaryKeyValue((Long)value, otsColumn);
+            return primaryKeyValue((Long) value, otsColumn);
         } else if (value instanceof Float) {
-            return primaryKeyValue((Float)value, otsColumn);
+            return primaryKeyValue((Float) value, otsColumn);
         } else if (value instanceof Double) {
-            return primaryKeyValue((Double)value, otsColumn);
+            return primaryKeyValue((Double) value, otsColumn);
         } else if (value instanceof Boolean) {
-            return primaryKeyValue((Boolean)value, otsColumn);
+            return primaryKeyValue((Boolean) value, otsColumn);
         } else if (value instanceof String) {
-            return primaryKeyValue((String)value, otsColumn);
+            return primaryKeyValue((String) value, otsColumn);
         } else {
             return primaryKeyValue(value, otsColumn);
         }
@@ -121,7 +127,8 @@ public class ColumnUtils {
         }
     }
 
-    public static Object getValue(PrimaryKeyColumn column, OtsColumn otsColumn, Class<?> clazz, Type type) {
+    public static Object getValue(PrimaryKeyColumn column, OtsColumn otsColumn, Class<?> clazz,
+        Type type) {
         switch (column.getValue().getType()) {
             case BINARY:
                 return getValue(column.getValue().asBinary(), otsColumn, clazz);
@@ -137,7 +144,7 @@ public class ColumnUtils {
     public static <T> PrimaryKey primaryKey(T key) {
         Class<?> clazz = key.getClass();
         if (clazz.isAssignableFrom(PrimaryKey.class)) {
-            return (PrimaryKey)key;
+            return (PrimaryKey) key;
         } else {
             List<PrimaryKeyColumn> columns = Lists.newArrayList();
             Field[] fields = clazz.getDeclaredFields();
@@ -167,7 +174,7 @@ public class ColumnUtils {
     public static <T> PrimaryKey primaryKey(T key, KeyType keyType, Direction direction) {
         Class<?> clazz = key.getClass();
         if (clazz.isAssignableFrom(PrimaryKey.class)) {
-            return (PrimaryKey)key;
+            return (PrimaryKey) key;
         } else {
             List<PrimaryKeyColumn> columns = Lists.newArrayList();
             Field[] fields = clazz.getDeclaredFields();
@@ -176,7 +183,8 @@ public class ColumnUtils {
                 Object value = FieldUtils.invokeRead(field, key);
                 OtsColumn otsColumn = field.getAnnotation(OtsColumn.class);
                 String columnName = ColumnUtils.getColumnName(fieldName, otsColumn);
-                PrimaryKeyValue primaryKeyValue = primaryKeyValue(value, otsColumn, keyType, direction);
+                PrimaryKeyValue primaryKeyValue = primaryKeyValue(value, otsColumn, keyType,
+                    direction);
                 if (primaryKeyValue != null) {
                     columns.add(new PrimaryKeyColumn(columnName, primaryKeyValue));
                 }
@@ -634,12 +642,14 @@ public class ColumnUtils {
             return Boolean.parseBoolean(value);
         } else if (clazz.isAssignableFrom(String.class)) {
             return value;
+        } else if (clazz.isEnum()) {
+            return getEnumFromString((Class<Enum>) clazz, value);
         } else if (clazz.isAssignableFrom(List.class)) {
             if (type == null) {
                 return JSON.parseArray(value);
             } else if (type instanceof ParameterizedType) {
-                ParameterizedType parameterizedType = (ParameterizedType)type;
-                return JSON.parseArray(value, (Class<?>)parameterizedType.getActualTypeArguments()[0]);
+                ParameterizedType parameterizedType = (ParameterizedType) type;
+                return JSON.parseArray(value, (Class<?>) parameterizedType.getActualTypeArguments()[0]);
             } else {
                 return JSON.parseArray(value);
             }
@@ -650,13 +660,44 @@ public class ColumnUtils {
         }
     }
 
+    public static <T extends Enum<T>> T enumFromString(Class<? extends Enum<?>> c, String string) {
+        try {
+            Method method = c.getMethod("valueOf", Enum.class);
+            return (T) method.invoke(null, string);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
+    /**
+     * A common method for all enums since they can't have another base class
+     *
+     * @param <T> Enum type
+     * @param c enum type. All enums must be all caps.
+     * @param string case insensitive
+     * @return corresponding enum, or null
+     */
+    public static <T extends Enum<T>> T getEnumFromString(Class<T> c, String string) {
+        if (c != null && string != null) {
+            try {
+                return Enum.valueOf(c, string.trim().toUpperCase());
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+        return null;
+    }
+
     private static byte[] compress(byte[] value, OtsColumn otsColumn) {
         if (otsColumn == null) {
             return value;
         }
         try {
             Method method = otsColumn.compress().getDeclaredMethod("compress", byte[].class);
-            return (byte[])method.invoke(null, (Object)value);
+            return (byte[]) method.invoke(null, (Object) value);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -669,14 +710,15 @@ public class ColumnUtils {
         }
         try {
             Method method = uncompress.getDeclaredMethod("uncompress", byte[].class);
-            return (byte[])method.invoke(null, (Object)value);
+            return (byte[]) method.invoke(null, (Object) value);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    private static PrimaryKeyValue primaryKeyValue(Object value, OtsColumn otsColumn, KeyType keyType, Direction direction) {
+    private static PrimaryKeyValue primaryKeyValue(Object value, OtsColumn otsColumn,
+        KeyType keyType, Direction direction) {
         switch (keyType) {
             case START:
                 switch (direction) {

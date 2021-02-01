@@ -32,6 +32,7 @@ import com.alicloud.openservices.tablestore.model.UpdateRowResponse;
 import com.alicloud.openservices.tablestore.model.search.SearchQuery;
 import com.alicloud.openservices.tablestore.model.search.SearchRequest;
 import com.alicloud.openservices.tablestore.model.search.SearchResponse;
+import com.alicloud.openservices.tablestore.model.search.query.ExistsQuery;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import java.util.List;
@@ -117,6 +118,11 @@ public class TableStoreServiceImpl implements TableStoreService {
             return null;
         }
         return OtsUtils.build(row, clazz);
+    }
+
+    @Override
+    public <T> void exists(ExistsQuery existsQuery, List<String> columnNames, Class<T> clazz) {
+        // TODO
     }
 
     @Override
