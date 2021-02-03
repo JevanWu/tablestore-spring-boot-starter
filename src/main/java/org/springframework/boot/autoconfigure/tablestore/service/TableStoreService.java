@@ -124,4 +124,15 @@ public interface TableStoreService {
      * @return 返回查询响应
      */
     <T> IndexSearchReply<T> search(IndexSearchQuery query, Class<T> clazz);
+
+    /**
+     * 从TableStore查询数据
+     *
+     * @param indexName 索引名称
+     * @param query 查询请求
+     * @param clazz 泛型类型
+     * @param <T> 泛型
+     * @return 返回查询响应
+     */
+    <T> IndexSearchReply<T> search(String indexName, IndexSearchQuery query, Class<T> clazz);
 }

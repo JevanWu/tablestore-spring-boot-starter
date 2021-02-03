@@ -187,6 +187,7 @@ public class TableStoreServiceImpl implements TableStoreService {
         return reply;
     }
 
+
     @Override
     public <T> BatchGetReply<T> batchGet(BatchGetQuery query, Class<T> clazz) {
         Preconditions.checkNotNull(query);
@@ -224,6 +225,11 @@ public class TableStoreServiceImpl implements TableStoreService {
 
     @Override
     public <T> IndexSearchReply<T> search(IndexSearchQuery query, Class<T> clazz) {
+        return this.search(null, query, clazz);
+    }
+
+    @Override
+    public <T> IndexSearchReply<T> search(String indexName, IndexSearchQuery query, Class<T> clazz) {
         Preconditions.checkNotNull(query);
         Table table = clazz.getAnnotation(Table.class);
         if (table == null) {
@@ -235,6 +241,12 @@ public class TableStoreServiceImpl implements TableStoreService {
         if (StringUtils.isBlank(table.index())) {
             throw new OtsException("the index of table annotation is absent");
         }
+
+        String finalIndexName = table.index();
+        if (StringUtils.isNotBlank(indexName)) {
+            finalIndexName = indexName;
+        }
+
         SearchQuery searchQuery = query.searchQuery();
         SearchRequest.ColumnsToGet columnsToGet = new SearchRequest.ColumnsToGet();
         if (CollectionUtils.isNotEmpty(query.columns())) {
@@ -242,7 +254,7 @@ public class TableStoreServiceImpl implements TableStoreService {
         } else {
             columnsToGet.setReturnAll(true);
         }
-        SearchRequest request = new SearchRequest(table.name(), table.index(), searchQuery);
+        SearchRequest request = new SearchRequest(table.name(), finalIndexName, searchQuery);
         request.setColumnsToGet(columnsToGet);
         SearchResponse response = syncClient.search(request);
 

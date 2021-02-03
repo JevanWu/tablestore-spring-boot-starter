@@ -15,6 +15,8 @@ import java.util.List;
  */
 public class IndexSearchQuery {
 
+    private String indexName;
+
     private Query query;
 
     private List<Aggregation> aggregationList;
@@ -38,6 +40,14 @@ public class IndexSearchQuery {
         searchQuery.setGetTotalCount(getTotalCount);
         searchQuery.setSort(sort);
         return searchQuery;
+    }
+
+    public String indexName() {
+        return indexName;
+    }
+
+    public void indexName(String indexName) {
+        this.indexName = indexName;
     }
 
     public Query query() {
