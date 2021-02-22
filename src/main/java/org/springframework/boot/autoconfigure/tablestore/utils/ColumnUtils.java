@@ -3,6 +3,7 @@ package org.springframework.boot.autoconfigure.tablestore.utils;
 import com.alibaba.fastjson.JSON;
 import com.alicloud.openservices.tablestore.model.Column;
 import com.alicloud.openservices.tablestore.model.ColumnValue;
+import com.alicloud.openservices.tablestore.model.DefinedColumnType;
 import com.alicloud.openservices.tablestore.model.Direction;
 import com.alicloud.openservices.tablestore.model.PrimaryKey;
 import com.alicloud.openservices.tablestore.model.PrimaryKeyColumn;
@@ -14,10 +15,12 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.autoconfigure.tablestore.annotation.OtsColumn;
+import org.springframework.boot.autoconfigure.tablestore.enums.OtsColumnType;
 import org.springframework.boot.autoconfigure.tablestore.model.RangeGetQuery.KeyType;
 import org.springframework.boot.autoconfigure.tablestore.utils.compress.NoCompress;
 
@@ -139,6 +142,46 @@ public class ColumnUtils {
             default:
                 return null;
         }
+    }
+
+    /**
+     * 转换数据类型 字典
+     */
+    public static DefinedColumnType convertType(OtsColumnType columnType) {
+        switch (columnType) {
+            case STRING:
+                return DefinedColumnType.STRING;
+            case DOUBLE:
+                return DefinedColumnType.DOUBLE;
+            case BOOLEAN:
+                return DefinedColumnType.BOOLEAN;
+            case INTEGER:
+                return DefinedColumnType.INTEGER;
+            case BINARY:
+            case NONE:
+            default:
+                return DefinedColumnType.BINARY;
+        }
+    }
+
+    /**
+     * 解析 OtsColumn 注解信息
+     *
+     * @param clazz 对象 Class
+     * @return {@link OtsColumn} 集合
+     */
+    public static List<OtsColumn> getOtsColumn(Class clazz) {
+        List<OtsColumn> otsColumns = Lists.newArrayList();
+        Field[] fields = clazz.getDeclaredFields();
+        Arrays.stream(fields).forEach(f -> {
+            String fieldName = f.getName();
+            OtsColumn otsColumn = f.getAnnotation(OtsColumn.class);
+            if (otsColumn != null) {
+                otsColumns.add(otsColumn);
+            }
+        });
+
+        return otsColumns;
     }
 
     public static <T> PrimaryKey primaryKey(T key) {
