@@ -174,7 +174,6 @@ public class ColumnUtils {
         List<OtsColumn> otsColumns = Lists.newArrayList();
         Field[] fields = clazz.getDeclaredFields();
         Arrays.stream(fields).forEach(f -> {
-            String fieldName = f.getName();
             OtsColumn otsColumn = f.getAnnotation(OtsColumn.class);
             if (otsColumn != null) {
                 otsColumns.add(otsColumn);
