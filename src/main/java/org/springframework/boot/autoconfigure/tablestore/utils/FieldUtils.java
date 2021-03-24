@@ -22,7 +22,7 @@ import org.springframework.util.ReflectionUtils;
 public class FieldUtils {
 
     public static Pair<Map<String, FieldInfo>, Boolean> getDeclaredFields(Class<?> clazz) {
-        Map<String, FieldInfo> fieldInfoMap = Maps.newHashMap();
+        Map<String, FieldInfo> fieldInfoMap = Maps.newLinkedHashMap();
         boolean hasDynamicField = getDeclaredFields(clazz, fieldInfoMap);
         return Pair.of(fieldInfoMap, hasDynamicField);
     }
@@ -79,13 +79,12 @@ public class FieldUtils {
         Field[] fields = clazz.getDeclaredFields();
         for (Field field : fields) {
             field.setAccessible(true);
-            if (Modifier.isFinal(field.getModifiers()) || Modifier.isFinal(field.getModifiers())) {
-                continue;
-            }
-            OtsColumn otsColumn = field.getAnnotation(OtsColumn.class);
-            String columnName = ColumnUtils.getColumnName(field.getName(), otsColumn);
-            if (!fieldMap.containsKey(field.getName())) {
-                fieldMap.put(columnName, new FieldInfo(otsColumn, field));
+            if (!Modifier.isFinal(field.getModifiers()) && !Modifier.isStatic(field.getModifiers())) {
+                OtsColumn otsColumn = field.getAnnotation(OtsColumn.class);
+                String columnName = ColumnUtils.getColumnName(field.getName(), otsColumn);
+                if (!fieldMap.containsKey(field.getName())) {
+                    fieldMap.put(columnName, new FieldInfo(otsColumn, field));
+                }
             }
         }
         Class<?> superClass = clazz.getSuperclass();
