@@ -2,9 +2,8 @@ package org.springframework.boot.autoconfigure.tablestore.model;
 
 import com.alicloud.openservices.tablestore.model.Direction;
 import com.alicloud.openservices.tablestore.model.PrimaryKey;
-import org.springframework.boot.autoconfigure.tablestore.utils.ColumnUtils;
-
 import java.util.List;
+import org.springframework.boot.autoconfigure.tablestore.utils.ColumnUtils;
 
 /**
  * Created on 2020/10/09
@@ -12,6 +11,8 @@ import java.util.List;
  * @author Kenn
  */
 public class RangeGetQuery {
+
+    private String tableName;
 
     private PrimaryKey startPrimaryKey;
 
@@ -22,6 +23,14 @@ public class RangeGetQuery {
     private int limit = 100;
 
     private Direction direction = Direction.FORWARD;
+
+    public String tableName() {
+        return tableName;
+    }
+
+    public void tableName(String tableName) {
+        this.tableName = tableName;
+    }
 
     public PrimaryKey startPrimaryKey() {
         return startPrimaryKey;

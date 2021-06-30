@@ -38,6 +38,7 @@ import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -164,9 +165,13 @@ public class TableStoreServiceImpl implements TableStoreService {
         PrimaryKey start = query.startPrimaryKey();
         int batchSize = Math.min(query.limit(), 100);
         while (start != null) {
-            GetRangeResponse response = getRange(table.name(), start, query.endPrimaryKey(),
+            GetRangeResponse response = getRange(
+                Optional.ofNullable(query.tableName()).orElse(table.name()),
+                start,
+                query.endPrimaryKey(),
                 query.columnNames(),
                 query.direction(), batchSize);
+            
             if (response == null || response.getRows() == null) {
                 reply.nextStartPrimaryKey(null);
                 break;
