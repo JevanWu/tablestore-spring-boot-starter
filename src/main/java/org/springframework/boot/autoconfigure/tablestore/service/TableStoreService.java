@@ -14,6 +14,7 @@ import org.springframework.boot.autoconfigure.tablestore.model.IndexSearchQuery;
 import org.springframework.boot.autoconfigure.tablestore.model.IndexSearchReply;
 import org.springframework.boot.autoconfigure.tablestore.model.RangeGetQuery;
 import org.springframework.boot.autoconfigure.tablestore.model.RangeGetReply;
+import org.springframework.boot.autoconfigure.tablestore.utils.OtsWrapper;
 
 /**
  * Created on 2020/10/09
@@ -135,4 +136,13 @@ public interface TableStoreService {
      * @return 返回查询响应
      */
     <T> IndexSearchReply<T> search(String indexName, IndexSearchQuery query, Class<T> clazz);
+
+    /**
+     * 从TableStore查询数据
+     *
+     * @param queryWrapper
+     * @param <T>
+     * @return
+     */
+    <T> IndexSearchReply<T> search(OtsWrapper.QueryWrapper<T> queryWrapper);
 }

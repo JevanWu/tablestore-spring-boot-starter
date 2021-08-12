@@ -55,6 +55,7 @@ import org.springframework.boot.autoconfigure.tablestore.model.RangeGetReply;
 import org.springframework.boot.autoconfigure.tablestore.model.internal.FieldInfo;
 import org.springframework.boot.autoconfigure.tablestore.service.TableStoreService;
 import org.springframework.boot.autoconfigure.tablestore.utils.ColumnUtils;
+import org.springframework.boot.autoconfigure.tablestore.utils.OtsWrapper;
 import org.springframework.boot.autoconfigure.tablestore.utils.FieldUtils;
 import org.springframework.boot.autoconfigure.tablestore.utils.OtsUtils;
 
@@ -231,6 +232,11 @@ public class TableStoreServiceImpl implements TableStoreService {
     @Override
     public <T> IndexSearchReply<T> search(IndexSearchQuery query, Class<T> clazz) {
         return this.search(null, query, clazz);
+    }
+
+    @Override
+    public <T> IndexSearchReply<T> search(OtsWrapper.QueryWrapper<T> queryWrapper) {
+        return this.search(queryWrapper.resolveSearchQuery(), queryWrapper.getClazz());
     }
 
     @Override
