@@ -11,7 +11,7 @@ import org.springframework.boot.autoconfigure.tablestore.model.internal.FieldInf
 import java.security.InvalidParameterException;
 import java.util.*;
 
-public final class OtsWrapper {
+public final class OtsWrappers {
 
     public static <T> QueryWrapper<T> query(Class<T> clazz) {
         return new QueryWrapper<T>(clazz);
@@ -86,17 +86,17 @@ public final class OtsWrapper {
             return this;
         }
 
-        public QueryWrapper<T> in(String fieldName, Collection values) {
+        public QueryWrapper<T> in(String fieldName, Collection<?> values) {
             return termsQuery(fieldName, values);
         }
 
         public QueryWrapper in(boolean condition,
-                               String fieldName, List<Object> values) {
+                               String fieldName, Collection<?> values) {
             if (!condition) return this;
             return in(fieldName, values);
         }
 
-        private QueryWrapper<T> termsQuery(String fieldName, Collection values) {
+        private QueryWrapper<T> termsQuery(String fieldName, Collection<?> values) {
             var query = new TermsQuery();
             query.setFieldName(fieldName);
             values.forEach(value -> {
@@ -221,7 +221,7 @@ public final class OtsWrapper {
         Query resolveQuery() {
             var boolQuery = new BoolQuery();
             boolQuery.setMustQueries(mustQueries);
-            OtsWrapper wrapper = new OtsWrapper();
+            OtsWrappers wrapper = new OtsWrappers();
             return boolQuery;
         }
 

@@ -11,11 +11,11 @@ import org.springframework.boot.autoconfigure.tablestore.enums.OtsColumnType;
 import java.util.ArrayList;
 import java.util.List;
 
-class OtsWrapperTest {
+class OtsWrappersTest {
 
     @Test
     void testEq() {
-        var queryWrapper = OtsWrapper.query(Foo.class)
+        var queryWrapper = OtsWrappers.query(Foo.class)
                 .eq("field1", "hello")
                 .eq("field2", 2L)
                 .eq("field3", 3.0)
@@ -42,7 +42,7 @@ class OtsWrapperTest {
 
     @Test
     void testIn() {
-        var queryWrapper = OtsWrapper.query(Foo.class)
+        var queryWrapper = OtsWrappers.query(Foo.class)
                 .in("field1", List.of("hello"));
 
         List<Query> queries = new ArrayList<>();
@@ -58,7 +58,7 @@ class OtsWrapperTest {
 
     @Test
     void testGe() {
-        var queryWrapper = OtsWrapper.query(Foo.class)
+        var queryWrapper = OtsWrappers.query(Foo.class)
                 .ge("field3", 3.0);
 
         List<Query> queries = new ArrayList<>();
@@ -74,7 +74,7 @@ class OtsWrapperTest {
 
     @Test
     void testGt() {
-        var queryWrapper = OtsWrapper.query(Foo.class)
+        var queryWrapper = OtsWrappers.query(Foo.class)
                 .gt("field3", 3.0);
 
         List<Query> queries = new ArrayList<>();
@@ -90,7 +90,7 @@ class OtsWrapperTest {
 
     @Test
     void testLe() {
-        var queryWrapper = OtsWrapper.query(Foo.class)
+        var queryWrapper = OtsWrappers.query(Foo.class)
                 .le("field3", 3.0);
 
         List<Query> queries = new ArrayList<>();
@@ -106,7 +106,7 @@ class OtsWrapperTest {
 
     @Test
     void testLt() {
-        var queryWrapper = OtsWrapper.query(Foo.class)
+        var queryWrapper = OtsWrappers.query(Foo.class)
                 .lt("field3", 3.0);
 
         List<Query> queries = new ArrayList<>();
