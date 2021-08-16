@@ -4,6 +4,7 @@ import com.alicloud.openservices.tablestore.model.ColumnType;
 import com.alicloud.openservices.tablestore.model.ColumnValue;
 import com.alicloud.openservices.tablestore.model.search.query.*;
 import com.alicloud.openservices.tablestore.model.search.sort.Sort;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.boot.autoconfigure.tablestore.enums.OtsColumnType;
 import org.springframework.boot.autoconfigure.tablestore.model.IndexSearchQuery;
 import org.springframework.boot.autoconfigure.tablestore.model.internal.FieldInfo;
@@ -79,10 +80,12 @@ public final class OtsWrappers {
         }
 
         private QueryWrapper<T> termQuery(String fieldName, Object value) {
-            var query = new TermQuery();
-            query.setFieldName(fieldName);
-            query.setTerm(resolveColumnValue(fieldName, value));
-            mustQueries.add(query);
+            if (ObjectUtils.isNotEmpty(value)) {
+                var query = new TermQuery();
+                query.setFieldName(fieldName);
+                query.setTerm(resolveColumnValue(fieldName, value));
+                mustQueries.add(query);
+            }
             return this;
         }
 
@@ -97,12 +100,14 @@ public final class OtsWrappers {
         }
 
         private QueryWrapper<T> termsQuery(String fieldName, Collection<?> values) {
-            var query = new TermsQuery();
-            query.setFieldName(fieldName);
-            values.forEach(value -> {
-                query.addTerm(resolveColumnValue(fieldName, value));
-            });
-            mustQueries.add(query);
+            if (ObjectUtils.isNotEmpty(values)) {
+                var query = new TermsQuery();
+                query.setFieldName(fieldName);
+                values.forEach(value -> {
+                    query.addTerm(resolveColumnValue(fieldName, value));
+                });
+                mustQueries.add(query);
+            }
             return this;
         }
 
@@ -127,10 +132,12 @@ public final class OtsWrappers {
         }
 
         private QueryWrapper<T> geTermQuery(String fieldName, Object value) {
-            var query = new RangeQuery();
-            query.setFieldName(fieldName);
-            query.greaterThanOrEqual(resolveColumnValue(fieldName, value));
-            mustQueries.add(query);
+            if (ObjectUtils.isNotEmpty(value)) {
+                var query = new RangeQuery();
+                query.setFieldName(fieldName);
+                query.greaterThanOrEqual(resolveColumnValue(fieldName, value));
+                mustQueries.add(query);
+            }
             return this;
         }
 
@@ -155,10 +162,12 @@ public final class OtsWrappers {
         }
 
         private QueryWrapper<T> gtTermQuery(String fieldName, Object value) {
-            var query = new RangeQuery();
-            query.setFieldName(fieldName);
-            query.greaterThan(resolveColumnValue(fieldName, value));
-            mustQueries.add(query);
+            if (ObjectUtils.isNotEmpty(value)) {
+                var query = new RangeQuery();
+                query.setFieldName(fieldName);
+                query.greaterThan(resolveColumnValue(fieldName, value));
+                mustQueries.add(query);
+            }
             return this;
         }
 
@@ -183,10 +192,12 @@ public final class OtsWrappers {
         }
 
         private QueryWrapper<T> leTermQuery(String fieldName, Object value) {
-            var query = new RangeQuery();
-            query.setFieldName(fieldName);
-            query.lessThanOrEqual(resolveColumnValue(fieldName, value));
-            mustQueries.add(query);
+            if (ObjectUtils.isNotEmpty(value)) {
+                var query = new RangeQuery();
+                query.setFieldName(fieldName);
+                query.lessThanOrEqual(resolveColumnValue(fieldName, value));
+                mustQueries.add(query);
+            }
             return this;
         }
 
@@ -211,10 +222,12 @@ public final class OtsWrappers {
         }
 
         private QueryWrapper<T> ltTermQuery(String fieldName, Object value) {
-            var query = new RangeQuery();
-            query.setFieldName(fieldName);
-            query.lessThan(resolveColumnValue(fieldName, value));
-            mustQueries.add(query);
+            if (ObjectUtils.isNotEmpty(value)) {
+                var query = new RangeQuery();
+                query.setFieldName(fieldName);
+                query.lessThan(resolveColumnValue(fieldName, value));
+                mustQueries.add(query);
+            }
             return this;
         }
 
