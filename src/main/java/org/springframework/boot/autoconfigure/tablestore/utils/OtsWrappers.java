@@ -23,8 +23,8 @@ public final class OtsWrappers {
         private final List<Query> mustNotQueries = new ArrayList<>();
         private final Map<String, FieldInfo> fieldInfoMap;
         private final Class<T> clazz;
-        private int pageSize = 20;
-        private int pageNum = 0;
+        private int pageSize;
+        private int pageNum;
         private Sort sort;
         private boolean includeTotalCount = false;
 
@@ -37,6 +37,11 @@ public final class OtsWrappers {
         public QueryWrapper<T> page(int pageNum, int pageSize) {
             this.pageNum = pageNum;
             this.pageSize = pageSize;
+            return this;
+        }
+
+        public QueryWrapper<T> limit(int limit) {
+            this.pageSize = limit;
             return this;
         }
 
@@ -284,8 +289,10 @@ public final class OtsWrappers {
             IndexSearchQuery searchQuery = new IndexSearchQuery();
             searchQuery.query(this.resolveQuery());
             searchQuery.getTotalCount(this.includeTotalCount);
-            searchQuery.offset(this.pageNum * this.pageSize);
-            searchQuery.size(this.pageSize);
+            if (ObjectUtils.allNotNull(this.pageNum, this.pageSize)) {
+                searchQuery.offset(this.pageNum * this.pageSize);
+            }
+            if (ObjectUtils.isNotEmpty(this.pageSize)) searchQuery.size(this.pageSize);
             searchQuery.sort(this.sort);
             return searchQuery;
         }
