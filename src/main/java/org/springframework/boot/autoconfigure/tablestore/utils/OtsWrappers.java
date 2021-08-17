@@ -22,10 +22,10 @@ public final class OtsWrappers {
         private final List<Query> mustQueries = new ArrayList<>();
         private final Map<String, FieldInfo> fieldInfoMap;
         private final Class<T> clazz;
-        private int pageSize;
-        private int pageNum;
+        private int pageSize = 20;
+        private int pageNum = 0;
         private Sort sort;
-        private boolean includeTotalCount;
+        private boolean includeTotalCount = false;
 
         public QueryWrapper(Class<T> clazz) {
             this.clazz = clazz;
