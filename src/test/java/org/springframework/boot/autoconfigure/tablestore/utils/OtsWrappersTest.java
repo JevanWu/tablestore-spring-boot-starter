@@ -120,6 +120,24 @@ class OtsWrappersTest {
         Assertions.assertEquals(JSON.toJSONString(compactQuery), JSON.toJSONString(queryWrapper.resolveQuery()));
     }
 
+    @Test
+    void testNe() {
+        var queryWrapper = OtsWrappers.query(Foo.class)
+                .ne("field3", 3.0);
+
+        List<Query> queries = new ArrayList<>();
+        var termQuery = new TermQuery();
+        termQuery.setFieldName("field3");
+        termQuery.setTerm(ColumnValue.fromDouble(3.0));
+        queries.add(termQuery);
+        var compactQuery = new BoolQuery();
+        compactQuery.setMustNotQueries(queries);
+        compactQuery.setMustQueries(List.of());
+
+        Assertions.assertEquals(JSON.toJSONString(compactQuery), JSON.toJSONString(queryWrapper.resolveQuery()));
+
+    }
+
     class Foo {
         @OtsColumn(type = OtsColumnType.STRING)
         private String field1;

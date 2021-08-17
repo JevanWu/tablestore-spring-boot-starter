@@ -20,6 +20,7 @@ public final class OtsWrappers {
 
     public static class QueryWrapper<T> {
         private final List<Query> mustQueries = new ArrayList<>();
+        private final List<Query> mustNotQueries = new ArrayList<>();
         private final Map<String, FieldInfo> fieldInfoMap;
         private final Class<T> clazz;
         private int pageSize = 20;
@@ -93,7 +94,7 @@ public final class OtsWrappers {
             return termsQuery(fieldName, values);
         }
 
-        public QueryWrapper in(boolean condition,
+        public QueryWrapper<T> in(boolean condition,
                                String fieldName, Collection<?> values) {
             if (!condition) return this;
             return in(fieldName, values);
@@ -231,9 +232,50 @@ public final class OtsWrappers {
             return this;
         }
 
+        public QueryWrapper<T> ne(String fieldName, String value) {
+            return neQuery(fieldName, value);
+        }
+
+        public QueryWrapper<T> ne(boolean condition,
+                                  String fieldName, String value) {
+            if (!condition) return this;
+            return eq(fieldName, value);
+        }
+
+        public QueryWrapper<T> ne(String fieldName, Long value) {
+            return neQuery(fieldName, value);
+        }
+
+        public QueryWrapper<T> ne(boolean condition,
+                                  String fieldName, Long value) {
+            if (!condition) return this;
+            return eq(fieldName, value);
+        }
+
+        public QueryWrapper<T> ne(String fieldName, Double value) {
+            return neQuery(fieldName, value);
+        }
+
+        public QueryWrapper<T> ne(boolean condition,
+                                  String fieldName, Double value) {
+            if (!condition) return this;
+            return eq(fieldName, value);
+        }
+
+        private QueryWrapper<T> neQuery(String fieldName, Object value) {
+            if (ObjectUtils.isNotEmpty(value)) {
+                var query = new TermQuery();
+                query.setFieldName(fieldName);
+                query.setTerm(resolveColumnValue(fieldName, value));
+                mustNotQueries.add(query);
+            }
+            return this;
+        }
+
         Query resolveQuery() {
             var boolQuery = new BoolQuery();
             boolQuery.setMustQueries(mustQueries);
+            boolQuery.setMustNotQueries(mustNotQueries);
             OtsWrappers wrapper = new OtsWrappers();
             return boolQuery;
         }
