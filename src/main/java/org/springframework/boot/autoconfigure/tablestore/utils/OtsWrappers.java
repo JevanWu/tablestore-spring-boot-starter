@@ -23,7 +23,7 @@ public final class OtsWrappers {
         private final List<Query> mustNotQueries = new ArrayList<>();
         private final Map<String, FieldInfo> fieldInfoMap;
         private final Class<T> clazz;
-        private int pageSize;
+        private int pageSize = 20;
         private int pageNum;
         private Sort sort;
         private boolean includeTotalCount = false;
@@ -289,10 +289,9 @@ public final class OtsWrappers {
             IndexSearchQuery searchQuery = new IndexSearchQuery();
             searchQuery.query(this.resolveQuery());
             searchQuery.getTotalCount(this.includeTotalCount);
-            if (ObjectUtils.allNotNull(this.pageNum, this.pageSize)) {
-                searchQuery.offset(this.pageNum * this.pageSize);
-            }
-            if (ObjectUtils.isNotEmpty(this.pageSize)) searchQuery.size(this.pageSize);
+            // 不设置offset和size，默认会是0，会查不出东西
+            searchQuery.offset(this.pageNum * this.pageSize);
+            searchQuery.size(this.pageSize);
             searchQuery.sort(this.sort);
             return searchQuery;
         }
